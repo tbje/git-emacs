@@ -461,12 +461,14 @@ are very deep (used when repositioning mark on refresh)."
   (define-key map "i" 'git--status-view-add-ignore)
   (define-key map "r" 'git--status-view-rename)
   (define-key map "?" 'git--status-view-blame)
-  (define-key map (kbd "<delete>") 'git--status-view-rm)
+  (define-key map "\C-d" 'git--status-view-rm)
   (define-key map "*" 'git--status-view-mark-reg)
   (define-key map "s" 'git--status-view-summary)
   (define-key map "z" 'git-branch)
 
   (define-key map "c" (copy-keymap git--commit-map))
+  (define-key map "\C-c" 'git--status-view-checkout)
+      
   (define-key map "R" 'git-reset)
 
   (define-key map "\C-m" 'git--status-view-open-or-expand)
@@ -893,6 +895,63 @@ current line. You can think of this as the \"selected files\"."
           (message "Deleted %d files" num-deleted)))))
                                         
   (revert-buffer))
+
+(defun git--status-view-checkout ()
+  "Checkout the selected files."
+  (interactive)
+  (let* ((files (git--status-view-marked-or-file))
+         ;; We can't afford to use stale fileinfos here, the warnings
+         ;; are crucial.
+         (fresh-fileinfos (append (apply #'git--status-index files)
+                                  (apply #'git--ls-files "-o" "--" files)))
+         (untracked-files nil) (pending-files nil))
+    (dolist (fi fresh-fileinfos)
+      (let ((stat (git--fileinfo->stat fi)) (name (git--fileinfo->name fi)))
+        (if (member stat '(unknown ignored)) ;although ignored aren't really vis
+            (push name untracked-files)
+          (unless (eq stat 'uptodate) (push name pending-files)))))
+    ;; We really have to be careful about this -- elaborate warning message
+    (let* ((untracked-warn (git--bold-face "untracked"))
+           (pending-warn (concat "with " (git--bold-face "pending changes")))
+           (status-warning
+            (cond
+             ((eq (length files) (length untracked-files)) untracked-warn)
+             ((eq (length files) (length pending-files)) pending-warn)
+             (t (git--join
+                 (delq nil
+                       (list (when untracked-files
+                               (format "%d %s"
+                                       (length untracked-files) untracked-warn))
+                             (when pending-files
+                               (format "%d %s"
+                                       (length pending-files) pending-warn))))
+                 ", "))))
+           (status-warning-include (if (> (length status-warning) 0)
+                                      (format " (%s)" status-warning)
+                                     ""))
+           (msg (if (eq 1 (length files))
+                    (format "%s%s" (first files) status-warning-include)
+                  (format "%s files%s" (length files) status-warning-include))))
+      (unless (y-or-n-p (format "Really %s %s? "
+                                (git--bold-face "checkout")
+                                msg))
+        (error "Aborted checkout"))
+
+      ;; do git checkout on all the tracked files
+      (let ((tracked-files
+             (delq nil (mapcar #'(lambda(file)
+                                   (unless (member file untracked-files) file))
+                               files)))
+            (num-deleted 0))
+        (when tracked-files
+          (apply #'git--exec-string "checkout" tracked-files))
+        (incf num-deleted (length tracked-files))
+        ;; Remove other files directly
+        (unwind-protect
+          (message "Checked out %d files" num-deleted)))))
+                                        
+  (revert-buffer))
+
 
 (defun git--status-view-rename ()
   "Rename the selected file(s)."

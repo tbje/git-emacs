@@ -652,6 +652,11 @@ if git config fails (behaviour if unconfigured as of version 1.7.1)."
   (when (stringp files) (setq files (list files)))
   (apply #'git--exec-string "add" files))
 
+(defun git--checkout (files)
+  "Execute 'git checkout' with the sequence FILES."
+  (when (stringp files) (setq files (list files)))
+  (apply #'git--exec-string "checkout" files))
+
 (defun git--mv (src dst)
   "Execute git mv for SRC and DST files."
   (git--exec-string "mv" src dst))
@@ -1959,17 +1964,17 @@ valid ediff-buffer-A and B variables, among others. If the
 versions are identical, error out without executing either type
 of hook."
   (let* ((buf1 (find-file-noselect file))
-	 (buf2 nil)
-	 (config (current-window-configuration)))
+         (buf2 nil)
+         (config (current-window-configuration)))
 
     ;; build buf2
     (with-temp-buffer
       (let ((abspath (expand-file-name file))
-	    (filename nil))
+            (filename nil))
 
-	;; get relative to git root dir
-	(cd (git--get-top-dir (file-name-directory abspath)))
-	(let ((filerev (concat rev (file-relative-name abspath))))
+        ;; get relative to git root dir
+        (cd (git--get-top-dir (file-name-directory abspath)))
+        (let ((filerev (concat rev (file-relative-name abspath))))
               (setq buf2 (git--cat-file (if (equal rev ":")
                                             (concat "<index>" filerev)
                                           filerev)
