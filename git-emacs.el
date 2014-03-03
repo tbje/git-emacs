@@ -1,15 +1,15 @@
-;;; git-emacs (v.1.4.3) : yet another git emacs mode for newbies
+;;; git-emacs.el --- yet another git emacs mode for newbies
 ;;
-;; Copyright (C) 2008  TSKim (tsgatesv@gmail.com)
+;; Copyright (C) 2008  Taesoo Kim (tsgatesv@gmail.com)
 ;;
 ;; v.1.4.3 Modified by ovy            @ 20 September 2009
 ;; v.1.4   Modified by ovy            @ 22 March 2009
 ;; v.1.3   Modified by Con Digitalpit @ 29 March 2008
 ;;
-;; Authors    : TSKim : Kim Taesoo(tsgatesv@gmail.com)
-;; Created    : 24 March 2007
-;; License    : GPL
-;; Keywords   : git, version control, release management
+;; Authors:  Taesoo Kim <tsgatesv@gmail.com>
+;; Created:  24 March 2007
+;; License:  GPL
+;; Keywords: git, version control, release management
 ;;
 ;; Compatibility: Emacs22 and EmacsCVS (developed on 23.0.60.2)
 ;;                Git 1.5 and up
@@ -2614,15 +2614,19 @@ usual pre / post work: ask for save, ask for refresh."
 (defvar git-emacs-dot-timer nil)
 
 (defun git-install-monitor (secs)
+  ;; inital delay is 3sec
   (run-with-timer
-   0 secs
+   3 secs
    (lambda (p)
-     (loop for buffer in (buffer-list) do
-           (with-current-buffer buffer
-             (when (and buffer-file-name (git--in-vc-mode?))
-               (let ((top (expand-file-name ".git/index" (git--get-top-dir))))
-                 (when (> p (second (time-since (elt (file-attributes top) 4))))
-                   (git--update-modeline)))))))
+     ;; iterating visible buffers
+     (let ((visible-buffers 
+            (mapcar '(lambda (window) (window-buffer window)) (window-list))))
+       (loop for buffer in visible-buffers do
+             (with-current-buffer buffer
+               (when (and buffer-file-name (git--in-vc-mode?))
+                 (let ((top (expand-file-name ".git/index" (git--get-top-dir))))
+                   (when (> p (second (time-since (elt (file-attributes top) 4))))
+                     (git--update-modeline))))))))
    secs))
 
 (provide 'git-emacs)
