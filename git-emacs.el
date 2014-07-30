@@ -1239,6 +1239,7 @@ Trim the buffer log, commit runs any after-commit functions."
       (when (and begin end)
         (setq end (- end (length git--log-sep-line)))
         ;; TODO sophisticated message
+        (set (git--commit-message-var) (git--trim-string (buffer-substring begin end)))
         (message "%s" (apply #'git--commit
                              (git--trim-string (buffer-substring begin end))
                              git--commit-args)))))
@@ -1256,6 +1257,15 @@ Trim the buffer log, commit runs any after-commit functions."
 
     ;; hooks (e.g. switch branch)
     (run-hooks 'local-git--commit-after-hook 'git--commit-after-hook)))
+
+(defun git--commit-message-var () ""
+  (intern (format "git--commit-%s" (git--get-top-dir)))
+)
+
+(defun git-last-commit-message () ""
+  (interactive)
+  (insert (eval (git--commit-message-var)))
+)
 
 ;;-----------------------------------------------------------------------------
 ;; Merge support.
