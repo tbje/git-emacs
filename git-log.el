@@ -5,6 +5,15 @@
 (require 'log-view)
 (require 'git-emacs)
 
+(defun git--log-view-current-file ()
+  (save-excursion
+    (forward-line 1)
+    (or (re-search-backward log-view-file-re nil t)
+	(re-search-forward log-view-file-re nil t)
+	(error "Unable to determine the current file"))
+    (match-string 1)))
+
+
 ;; Based off of log-view-mode, which has some nice functionality, like
 ;; moving between comits
 (define-derived-mode git-log-view-mode
