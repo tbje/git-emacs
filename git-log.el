@@ -62,7 +62,8 @@
   (define-key map "m" 'set-mark-command) ; came with log-view-mode, nice idea
   (define-key map "d" 'git-log-view-diff-preceding)
   (define-key map "D" 'git-log-view-diff-current)
-  
+
+  (define-key map "i" 'git-log-view-rebase-i)
   (define-key map "c" 'git-log-view-cherry-pick)
   (define-key map "k" 'git-log-view-checkout)
   (define-key map "r" 'git-log-view-reset)
@@ -286,6 +287,12 @@ the working dir."
   (let ((commit (substring-no-properties (log-view-current-tag))))
     (when (y-or-n-p (format "Revert %s? " commit))
       (git-revert commit))))
+
+(defun git-log-view-rebase-i ()
+  "Revert the commit that the cursor is currently on"
+  (interactive)
+  (let ((commit (substring-no-properties (log-view-current-tag))))
+      (git--rebase-i commit)))
 
 (defun git-log-view-refresh ()
   "Refresh log view"
