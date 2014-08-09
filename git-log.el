@@ -42,13 +42,27 @@
 ;; much right now.
 (defvar git-log-view-font-lock-keywords
   '(("^\\([Cc]ommit\\|[Mm]erge\\):?\\(.*\\)$"
-     (1 font-lock-keyword-face prepend)
-     (2 font-lock-function-name-face prepend))
+     (2 font-lock-keyword-face prepend)
+     (1 font-lock-function-name-face prepend))
     ("^\\(Author\\):?\\(.*?\\([^<( \t]+@[^>) \t]+\\).*\\)$"
      (1 font-lock-keyword-face prepend) (2 font-lock-constant-face prepend)
      (3 font-lock-variable-name-face prepend))
     ("^\\(Date\\):?\\(.*\\)$"
      (1 font-lock-keyword-face prepend) (2 font-lock-doc-face prepend))
+    ("^\\([^ ]+\\) .*$"
+     (1 font-lock-keyword-face prepend))
+    ("^ \\([0-9]+ files? changed\\)\\(?:, [0-9]+ insertions?([+])\\)?$"
+     (1 font-lock-constant-face prepend))
+    ("^ \\([0-9]+ files? changed\\)\\(?:, [0-9]+ insertions?([+])\\)?\\(?:, \\([0-9]+ deletions?([-])\\)\\)$"
+     (1 font-lock-constant-face prepend)
+     (2 font-lock-doc-face prepend))
+    ("^[ ]\\([^ ]*\\) +[|] \\(Bin.*\\)$"
+     (1 font-lock-variable-name-face prepend)
+     (2 font-lock-keyword-face prepend))
+    ("^[ ]\\([^ ]*\\) +[|] +\\([0-9]*\\) [+]*\\([-]*\\)$"
+     (1 font-lock-variable-name-face prepend)
+     (2 font-lock-keyword-face prepend)
+     (3 font-lock-doc-face prepend))
     )
   "Font lock expressions for git log view mode")
 ;; (makunbound 'git-log-view-font-lock-keywords)  ; <-- C-x C-e to reset
@@ -169,7 +183,7 @@ git-status-mode."
   (git--log-view (git--if-in-status-mode
                      (git--status-view-marked-or-file)
                    (list buffer-file-name))))
- 
+
 (defun git-log ()
   "Launch the git log view for the whole repository"
   (interactive)
