@@ -77,8 +77,11 @@
   (define-key map "F" 'git-log-view-commit-file-prev)
 
   (define-key map "m" 'set-mark-command) ; came with log-view-mode, nice idea
-  (define-key map "d" 'git-log-view-diff-preceding)
-  (define-key map "D" 'git-log-view-diff-current)
+  (define-key map "z" 'git-log-view-diff-preceding)
+  (define-key map "Z" 'git-log-view-diff-current)
+
+  (define-key map "d" 'git-log-view-diff-file-preceding)
+  (define-key map "D" 'git-log-view-diff-file-current)
 
   (define-key map "i" 'git-log-view-rebase-i)
   (define-key map "c" 'git-log-view-cherry-pick)
