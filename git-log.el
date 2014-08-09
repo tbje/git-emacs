@@ -21,10 +21,10 @@
   :group 'git
   ;; Customize log-view-message-re to be the git commits
   (set (make-local-variable 'log-view-message-re)
-       "^[Cc]ommit[: ]*\\([0-9a-f]+\\)")
+       "\\(?:^[Cc]ommit[: ]*\\([0-9a-f]+$\\)\\)\\|\\(?:^\\([0-9a-f]\\{7\\}\\) .*$\\)")
   ;; As for the file re, there is no such thing -- make it impossible
   (set (make-local-variable 'log-view-file-re)
-       "^No_such_text_really$")
+       "^ \\([^ ]+\\) +|.*$")
   (set (make-local-variable 'font-lock-defaults)
        (list 'git-log-view-font-lock-keywords t))
   (set (make-local-variable 'transient-mark-mode) t)
