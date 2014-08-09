@@ -322,9 +322,13 @@ If a region is active, diff the first and last commits in the region."
                 (backward-char 1)))
             (log-view-msg-next)
             (log-view-current-tag)))))
-    ;; TODO: ediff if single file, but git--ediff does not allow revisions
-    ;; for both files
-    (git--diff-many git-log-view-filenames preceding-commit commit t)))
+    (if (eq 1 (length git-log-view-filenames))
+        (git--diff-revs
+         (first git-log-view-filenames)
+         (concat commit ":")
+         (concat preceding-commit ":"))
+      (git--diff-many git-log-view-filenames preceding-commit commit t))))
+
 
 (defun git-log-view-diff-current ()
   "Diff the commit the cursor is currently on against the current state of
