@@ -73,6 +73,9 @@
   (define-key map "N" 'git-log-view-interesting-commit-next)
   (define-key map "P" 'git-log-view-interesting-commit-prev)
 
+  (define-key map "f" 'git-log-view-commit-file-next)
+  (define-key map "F" 'git-log-view-commit-file-prev)
+
   (define-key map "m" 'set-mark-command) ; came with log-view-mode, nice idea
   (define-key map "d" 'git-log-view-diff-preceding)
   (define-key map "D" 'git-log-view-diff-current)
