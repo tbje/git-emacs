@@ -147,7 +147,7 @@
   "Records the starting commit (e.g. branch name) of the current log view")
 
 
-(defun git--log-view (&optional files start-commit dont-pop-buffer)
+(defun git--log-view (&optional files start-commit dont-pop-buffer logformat)
   "Show a log window for the given FILES; if none, the whole
 repository. If START-COMMIT is nil, use the current branch, otherwise the
 given commit. Assumes it is being run from a buffer whose
@@ -181,7 +181,7 @@ default-directory is inside the repo."
       ;; if not called with current buffer (undoes our setup)
       (apply #'vc-do-command buffer 'async "git" nil "log"
              (append (when start-commit (list start-commit))
-                     (list "--")
+                     (list (if logformat logformat "--stat=300"))
                      rel-filenames))
       ;; vc sometimes goes to the end of the buffer, for unknown reasons
       (vc-exec-after `(goto-char (point-min))))
