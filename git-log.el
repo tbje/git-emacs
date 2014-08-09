@@ -329,6 +329,12 @@ the working dir."
   (unless (boundp 'git-log-view-start-commit) (error "Not in git log view"))
   (git--log-view git-log-view-filenames git-log-view-start-commit))
 
+(defun git-log-view-short ()
+  "Refresh log view"
+  (interactive)
+  (unless (boundp 'git-log-view-start-commit) (error "Not in git log view"))
+  (git--log-view git-log-view-filenames git-log-view-start-commit nil "--oneline"))
+
 (defun git-log-view-tag (&optional tag-name)
   "Create a new tag for commit that the cursor is on."
 
