@@ -90,6 +90,9 @@
   (define-key map "v" 'git-log-view-revert)
   (define-key map "t" 'git-log-view-tag)
 
+  (define-key map "o" 'git-log-view-short)
+  (define-key map "O" 'git-log-view-refresh)
+
   (define-key map "g" 'git-log-view-refresh)
   (define-key map "q" 'git--quit-buffer))
 
