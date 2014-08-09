@@ -640,6 +640,14 @@ properly expanded tree."
   "Execute 'git reset ARGS', return the result string."
   (apply #'git--exec-string "reset" args))
 
+(defun git--rebase-i (commit)
+  "Put the git rebase -i \"commit\" on the kill ring. "
+  (let ((command (mapconcat 'identity `("git" "rebase" "-i" ,commit) " ")))
+    (message "On kill-ring: %s" command)
+    (kill-new command)
+))
+
+
 (defun git--config (&rest args)
   "Execute 'git config ARGS', return the result string. Return empty
 if git config fails (behaviour if unconfigured as of version 1.7.1)."
