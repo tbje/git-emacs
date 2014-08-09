@@ -131,6 +131,12 @@
  git-log-view-interesting-commit git-log-view-interesting-commit-re
  "interesting commit")
 
+(defvar git-log-view-commit-file-re "^ .* [|] "
+  "Regular expression defining \"file\"")
+(easy-mmode-define-navigation
+ git-log-view-commit-file git-log-view-commit-file-re
+ "file")
+
 
 ;; Implementation
 (defvar git-log-view-filenames nil
