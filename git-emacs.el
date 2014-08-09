@@ -2460,6 +2460,18 @@ that variable in .emacs.
                buffer-file-name)
              (concat commit ":")))
 
+(defun git-diff-hash(commit)
+  "Diff current buffer against an arbitrary commit"
+  (interactive
+   (progn
+     (list (git--select-revision "Diff against commit: "))))
+  (git--require-buffer-in-git)
+  (git--diff (git--if-in-status-mode
+                 (git--status-view-select-filename)
+               buffer-file-name)
+             (concat commit ":")))
+
+
 ;; git-diff-all variants
 (defun git-diff-all-head (&optional files)
   "Diff all of the repository, or just FILES, against HEAD."
