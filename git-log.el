@@ -279,6 +279,32 @@ branch."
                             (git--abbrev-commit commit)))
       (git-reset commit))))
 
+(defun git-log-view-diff-file-current ()
+  "Ediff the file with the current version."
+  (interactive)
+  (let ((file (substring-no-properties (git--log-view-current-file)))
+        (commit (git--abbrev-commit (log-view-current-tag))))
+    (git--diff file (concat commit ":" ))))
+
+
+(defun git-log-view-diff-file-preceding ()
+  "Ediff the file with the preceding version."
+  (interactive)
+  (let ((file (substring-no-properties (git--log-view-current-file)))
+        (commit (git--abbrev-commit (log-view-current-tag)))
+        (preceding-commit
+         (git--abbrev-commit
+          (save-excursion
+            (when mark-active
+              (goto-char (region-end))
+              ;; Go back one to get before the lowest commit, then
+              ;; msg-next will find it properly. Unless the region is empty.
+              (unless (equal (region-beginning) (region-end))
+                (backward-char 1)))
+            (log-view-msg-next)
+            (log-view-current-tag)))))
+    (git--diff-revs file (concat commit ":") (concat preceding-commit ":" ))))
+
 (defun git-log-view-diff-preceding ()
   "Diff the commit the cursor is currently on against the preceding commits.
 If a region is active, diff the first and last commits in the region."
