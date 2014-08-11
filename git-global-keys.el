@@ -20,6 +20,10 @@
 (define-key git--commit-map "f" '("[f]ile" . git-commit-file))
 (define-key git--commit-map "i" '("[i]ndex" . git-commit))
 (define-key git--commit-map "a" '("[a]ll" . git-commit-all))
+;; (define-key git--commit-ammend-map "f" '("[f]ile" . git-commit-file))
+;; (define-key git--commit-ammend-map "i" '("[i]ndex" . git-commit))
+;; (define-key git--commit-ammend-map "a" '("[a]ll" . git-commit-all))
+;; (define-key git--commit-map "A" '("[A]mmend" . (copy-keymap git--commit-ammend-map)))
 (define-key git--commit-map (kbd "RET") 'git-commit-all)
 
 (define-prefix-command 'git--diff-buffer-map nil "Diff against")
