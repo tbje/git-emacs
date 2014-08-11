@@ -1982,21 +1982,8 @@ valid ediff-buffer-A and B variables, among others. If the
 versions are identical, error out without executing either type
 of hook."
   (let* ((buf1 (find-file-noselect file))
-         (buf2 nil)
+         (buf2 (git--build-buff file rev))
          (config (current-window-configuration)))
-
-    ;; build buf2
-    (with-temp-buffer
-      (let ((abspath (expand-file-name file))
-            (filename nil))
-
-        ;; get relative to git root dir
-        (cd (git--get-top-dir (file-name-directory abspath)))
-        (let ((filerev (concat rev (file-relative-name abspath))))
-              (setq buf2 (git--cat-file (if (equal rev ":")
-                                            (concat "<index>" filerev)
-                                          filerev)
-                                        "blob" filerev)))))
     (when (eq 0 (compare-buffer-substrings buf1 nil nil buf2 nil nil))
       (kill-buffer buf2)
       (error "No differences vs. %s"
@@ -2021,6 +2008,15 @@ of hook."
               nil t)                     ; prepend, buffer-local
     ))
 
+(defun git--build-buff (file rev)
+  "Build a buffer with file and rev"
+  (with-temp-buffer
+    (let ((abspath file)
+          (filename nil))
+      (cd (git--get-top-dir (file-name-directory abspath)))
+      (let* ((filerev (concat rev (file-relative-name abspath)))
+            (buffer-name (if (equal rev ":") (concat "<index>" filerev) filerev)))
+        (git--cat-file buffer-name "blob" filerev)))))
 
 (defun git--diff-many (files &optional rev1 rev2 dont-ask-save reuse-buffer)
   "Shows a diff window for the specified files and revisions, since we can't
