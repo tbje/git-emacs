@@ -2339,7 +2339,7 @@ and it's not a git-status-buffer."
   "Diff current buffer, or current file in git-status,  against HEAD version,
 using ediff."
   (interactive)
-  (git--require-buffer-in-git)
+  ;;(git--require-buffer-in-git)
   (git--diff (git--if-in-status-mode
                  (git--status-view-select-filename)
                buffer-file-name)
