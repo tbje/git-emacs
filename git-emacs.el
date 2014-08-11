@@ -2019,6 +2019,51 @@ of hook."
             (buffer-name (if (equal rev ":") (concat "<index>" filerev) filerev)))
         (git--cat-file buffer-name "blob" filerev)))))
 
+(defun git--diff-revs (file rev1 rev2 &optional before-ediff-hook after-ediff-hook)
+  "Starts an ediff session between the FILE and its specified revision.
+REVISION should not include the filename, e.g. \"HEAD:\". If
+BEFORE-EDIFF-HOOK is specified, it is executed as an ediff setup
+hook. If AFTER-EDIFF-HOOK is specified, it is executed as an
+ediff quit hook. Both hooks run in the ediff context, i.e. with
+valid ediff-buffer-A and B variables, among others. If the
+versions are identical, error out without executing either type
+of hook."
+  (let* ((buf1 (git--build-buff file rev1))
+         (buf2 (git--build-buff file rev2))
+         (config (current-window-configuration)))
+
+    (cl-flet ((buffers-are-equal (buf1 buf2)
+        (eq 0 (compare-buffer-substrings buf1 nil nil buf2 nil nil))))
+      (when (buffers-are-equal buf1 buf2)
+        (kill-buffer buf1)
+        (kill-buffer buf2)
+        (error "No differences between revisions %s and %s for %s"
+               (or (car-safe (split-string rev1 ":" t)) "index")
+               (or (car-safe (split-string rev2 ":" t)) "index")
+               file))
+      )
+    (set-buffer
+     (ediff-buffers buf1 buf2
+                    (append
+                     (when before-ediff-hook (list before-ediff-hook)))))
+
+    (add-hook 'ediff-quit-hook
+              (lexical-let ((saved-config config)
+                            (saved-after-ediff-hook after-ediff-hook))
+                #'(lambda ()
+                    (let ((buffer-B ediff-buffer-B)
+                          (buffer-A ediff-buffer-A))
+                      (unwind-protect ; an error here is a real mess
+                          (when saved-after-ediff-hook
+                            (funcall saved-after-ediff-hook))
+                        (ediff-cleanup-mess)
+                        (kill-buffer buffer-B)
+                        (kill-buffer buffer-A)
+                        (set-window-configuration saved-config)))))
+              nil t)                     ; prepend, buffer-local
+    ))
+
+
 (defun git--diff-many (files &optional rev1 rev2 dont-ask-save reuse-buffer)
   "Shows a diff window for the specified files and revisions, since we can't
 do ediff on multiple files. FILES is a list of files, if empty the whole
