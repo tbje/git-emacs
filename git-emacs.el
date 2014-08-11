@@ -1981,7 +1981,8 @@ ediff quit hook. Both hooks run in the ediff context, i.e. with
 valid ediff-buffer-A and B variables, among others. If the
 versions are identical, error out without executing either type
 of hook."
-  (let* ((buf1 (find-file-noselect file))
+  (let* ((absfile (if (file-exists-p file) file (git--get-top-dir) file))
+         (buf1 (find-file-noselect absfile))
          (buf2 (git--build-buff file rev))
          (config (current-window-configuration)))
     (when (eq 0 (compare-buffer-substrings buf1 nil nil buf2 nil nil))
