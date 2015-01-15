@@ -5,6 +5,8 @@
 (require 'log-view)
 (require 'git-emacs)
 
+
+
 (defun git--log-view-current-file ()
   (save-excursion
     (forward-line 1)
@@ -83,6 +85,7 @@
   (define-key map "d" 'git-log-view-diff-file-preceding)
   (define-key map "D" 'git-log-view-diff-file-current)
 
+  (define-key map "C" 'git-log-view-open-current-file)
   (define-key map "V" 'git-log-view-file)
   (define-key map "i" 'git-log-view-rebase-i)
   (define-key map "c" 'git-log-view-cherry-pick)
@@ -336,6 +339,10 @@ If a region is active, diff the first and last commits in the region."
         (commit (git--abbrev-commit (log-view-current-tag))))
     (switch-to-buffer (git--build-buff file (concat commit ":" )))))
 
+(defun git-log-view-open-current-file () ""
+  (interactive)
+  (let ((file (substring-no-properties (git--log-view-current-file))))
+    (find-file file)))
 
 (defun git-log-view-diff-current ()
   "Diff the commit the cursor is currently on against the current state of
