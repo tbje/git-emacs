@@ -951,6 +951,30 @@ SIZE is 5, but it will be longer if needed (due to conflicts)."
             (setq current-branch branch)))))
     (cons (nreverse branches) current-branch)))
 
+(defun git--branch-list-remotes ()
+  "Get branch list, in the order returned by 'git branch'. Returns a cons cell
+\(list-of-branches . current-branch), where current-branch may be nil."
+
+  (let ((branches) (current-branch)
+        (regexp (concat " *\\([*]\\)? *" git--reg-branch "\n")))
+
+    (with-temp-buffer
+      (git-in-lowest-existing-dir
+       nil
+       (unless (eq 0 (git--exec-buffer "branch" "-lr"))
+         (error "%s" (git--trim-string (buffer-string)))))
+      (goto-char (point-min))
+
+      (while (re-search-forward regexp nil t)
+        (let ((branch (match-string 2)))
+          (unless (string= branch "(no branch)")
+            (push branch branches))
+          (when (and (not current-branch) (string= "*" (match-string 1)))
+            (setq current-branch branch)))))
+    branches))
+
+(git--branch-list-remotes)
+
 (defun git--cat-file (buffer-name &rest args)
   "Execute 'git cat-file ARGS' and return a new buffer named BUFFER-NAME
 with the file content"
@@ -2387,6 +2411,16 @@ using ediff."
                buffer-file-name)
              "HEAD:"))
 
+(defun git-diff-stash ()
+  "Diff current buffer, or current file in git-status,  against stash@{1},
+using ediff."
+  (interactive)
+  ;;(git--require-buffer-in-git)
+  (git--diff (git--if-in-status-mode
+                 (git--status-view-select-filename)
+               buffer-file-name)
+             "stash@{1}:"))
+
 (defun git-diff-index()
   "Diff current buffer, or current file in git-status,  against version
 in index, using ediff"
@@ -2524,6 +2558,11 @@ that variable in .emacs.
   "Diff all of the repository, or just FILES, against the index."
   (interactive)
   (git--diff-many files))
+
+(defun git-diff-all-stash (&optional files)
+  "Diff all of the repository, or just FILES, against the index."
+  (interactive)
+  (git--diff-many files "stash@{1}"))
 
 (defun git-diff-all-baseline (&optional files)
   "Diff all of the repository, or just FILES, against the \"baseline\" commit."
